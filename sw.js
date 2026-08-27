@@ -1,29 +1,37 @@
-/* 서비스 워커 — 앱 껍데기와 문항을 캐시에 넣어 **오프라인에서 전부 돌아가게** 한다.
+/* 서비스 워커 — **만들어진 파일이다. 손으로 고치지 마라.**
  *
- * 한국사 앱이 문항을 APK 안에 넣은 것과 같은 목적이다. 지하철에서 풀려야 한다.
- * `admin.json` 은 **일부러 넣지 않는다** — 관리자 모드일 때만 받아 온다.
+ *   생성: node tool/make_sw.mjs   (빌드 뒤에 돌린다)
+ *   버전: 파일 목록과 크기의 해시. 내용이 바뀌면 저절로 바뀐다.
  *
- * 콘텐츠를 새로 배포할 때는 아래 VERSION 을 올린다. 옛 캐시는 activate 에서 지운다.
+ * 껍데기와 문항은 install 에서 담고, 폰트는 요청될 때 담는다 —
+ * 폰트 509KB 는 PC 판만 쓰므로 모바일에서 미리 받을 이유가 없다.
  */
-const VERSION = 'ncsbank-v12';
+const VERSION = 'ncspass-f5c12a7c45';
+
+/** 첫 실행에 담을 것 — 16개 */
 const SHELL = [
-  './',
-  './index.html',
-  './app.css',
-  './app.js',
-  './manifest.webmanifest',
-  './icon.svg',
-  './icon-192.png',
-  './icon-512.png',
-  './icon-maskable-512.png',
-  './favicon-32.png',
-  './data/bank.json',
+  "./a/desktop-B7Ae9tiC.js",
+  "./a/desktop-D0-xJJxR.css",
+  "./a/mobile-2_Oyf407.js",
+  "./a/mobile-B69YTDkp.css",
+  "./a/search-D81vFUao.js",
+  "./a/search-NrRrvB_O.css",
+  "./data/bank.json",
+  "./favicon-32.png",
+  "./icon-192.png",
+  "./icon-512.png",
+  "./icon-maskable-512.png",
+  "./icon.svg",
+  "./index.html",
+  "./m-manifest.webmanifest",
+  "./m/index.html",
+  "./manifest.webmanifest"
 ];
 
 self.addEventListener('install', e => {
   e.waitUntil(
     caches.open(VERSION)
-      // 하나라도 실패하면 설치가 통째로 깨지므로 개별로 담는다
+      // 하나가 실패해도 설치를 깨지 않는다 — 나머지라도 담아 둔다
       .then(c => Promise.all(SHELL.map(u => c.add(u).catch(() => {}))))
       .then(() => self.skipWaiting())
   );
@@ -37,26 +45,51 @@ self.addEventListener('activate', e => {
   );
 });
 
+/** 껍데기 문서인가 — 이름이 안 바뀌는 주소라 캐시가 오래 남으면 위험한 것 */
+const isDoc = (req, url) => req.mode === 'navigate'
+                         || url.pathname.endsWith('/')
+                         || url.pathname.endsWith('.html');
+
 self.addEventListener('fetch', e => {
   const req = e.request;
   if (req.method !== 'GET') return;
-  const url = new URL(req.url);
-  if (url.origin !== location.origin) return;
-  // 재제작 판은 자기 워커가 맡는다 — 여기서 캐시하면 갱신이 한 박자 늦는다
-  if (url.pathname.includes('/next/')) return;
 
-  // 캐시가 있으면 먼저 내주고, 뒤에서 조용히 새것을 받아 둔다.
-  // 오프라인에서 즉시 뜨는 것이 먼저이고, 갱신은 다음 실행에 반영된다.
-  e.respondWith(
-    caches.match(req).then(hit => {
-      const net = fetch(req).then(res => {
-        if (res && res.ok) {
-          const copy = res.clone();
-          caches.open(VERSION).then(c => c.put(req, copy));
-        }
+  const url = new URL(req.url);
+  if (url.origin !== location.origin) return;      // 남의 집 것은 건드리지 않는다
+
+  e.respondWith((async () => {
+    const cache = await caches.open(VERSION);
+
+    // ── HTML — 그물 먼저, 끊기면 캐시 ───────────────────────
+    //    캐시를 먼저 주면 배포 뒤에도 옛 껍데기가 계속 나가고, 그 안의 묶음
+    //    이름은 이미 사라져 **하얀 화면**이 된다. 오프라인일 때만 캐시로 돈다.
+    if (isDoc(req, url)) {
+      try {
+        // fetch(req) 로는 모자란다 — 그것은 **브라우저 HTTP 캐시**를 먼저 본다.
+        //   GitHub Pages 가 HTML 에 max-age=600 을 붙이므로, 워커가 그물로 나가도
+        //   10분 동안 옛 껍데기가 되돌아온다(실측). no-cache 로 매번 서버에
+        //   물어본다 — 안 바뀌었으면 304 라 값이 거의 없다. (backtick 금지: 이 글은
+        //   템플릿 문자열 안에 들어간다)
+        const res = await fetch(url.href, { cache: 'no-cache', credentials: 'same-origin' });
+        if (res.ok && res.type === 'basic') cache.put(req, res.clone()).catch(() => {});
         return res;
-      }).catch(() => hit);
-      return hit || net;
-    })
-  );
+      } catch (err) {
+        const hit = await cache.match(req, { ignoreSearch: true })
+                 || await cache.match(url.pathname.includes('/m/') ? './m/index.html'
+                                                                   : './index.html');
+        if (hit) return hit;                        // 해시 라우터라 껍데기 하나로 된다
+        throw err;
+      }
+    }
+
+    // ── 그 밖 — 캐시 먼저 ───────────────────────────────────
+    //    묶음·폰트·아이콘·문항은 이름이나 캐시 판이 바뀌어야 바뀐다
+    const hit = await cache.match(req, { ignoreSearch: true });
+    if (hit) return hit;
+
+    const res = await fetch(req);
+    // 받아 온 것을 담아 둔다 — 폰트가 여기서 캐시된다
+    if (res.ok && res.type === 'basic') cache.put(req, res.clone()).catch(() => {});
+    return res;
+  })());
 });

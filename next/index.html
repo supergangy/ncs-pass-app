@@ -2,35 +2,28 @@
 <html lang="ko">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#6366F1">
-<title>NCS PASS</title>
-<link rel="manifest" href="manifest.webmanifest">
-<link rel="icon" href="icon.svg" type="image/svg+xml">
-<link rel="icon" href="favicon-32.png" sizes="32x32" type="image/png">
+<title>NCS PASS — 주소가 바뀌었습니다</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="canonical" href="../">
 <script>
-  /* 좁은 화면으로 들어오면 모바일 판으로 보낸다.
-   *
-   * 두 판은 코드가 서로 엮이지 않는다 — 이 스크립트는 **어느 문으로 들어갈지만**
-   * 정한다. 한 번 보낸 뒤에는 다시 판단하지 않는다(`?pc=1` 로 돌아올 수 있다).
-   * 렌더 전에 넘겨야 PC 화면이 한 번 번쩍이지 않는다.
-   */
-  (function () {
-    try {
-      if (location.search.includes('pc=1')) { sessionStorage.setItem('ncspass.pc', '1'); return; }
-      if (sessionStorage.getItem('ncspass.pc')) return;
-      if (matchMedia('(max-width: 767px)').matches) {
-        location.replace('./m/' + location.hash);
-      }
-    } catch (e) { /* 못 보내면 PC 판으로 둔다 — 안 보이는 것보다 낫다 */ }
-  })();
+  /* 해시를 그대로 들고 간다 — 북마크한 #/t/수리능력 이 열려야 한다 */
+  location.replace('../' + location.hash);
 </script>
-  <script type="module" crossorigin src="./a/desktop-B7Ae9tiC.js"></script>
-  <link rel="modulepreload" crossorigin href="./a/search-D81vFUao.js">
-  <link rel="stylesheet" crossorigin href="./a/search-NrRrvB_O.css">
-  <link rel="stylesheet" crossorigin href="./a/desktop-D0-xJJxR.css">
+<style>
+  body { margin: 0; display: grid; place-items: center; min-height: 100vh;
+         background: #f7f8fa; color: #0f172a;
+         font: 15px/1.7 -apple-system, "Segoe UI", "Malgun Gothic", sans-serif; }
+  div { max-width: 22rem; padding: 1.5rem; text-align: center; }
+  a { color: #4f46e5; font-weight: 700; }
+</style>
 </head>
 <body>
-<div id="root"></div>
+<div>
+  <p><b>NCS PASS</b> 는 주소를 옮겼습니다.</p>
+  <p><a href="../">여기서 이어서 풀기</a></p>
+  <p style="color:#64748b;font-size:13px">
+    푼 기록은 그대로 있습니다 — 같은 브라우저에 남습니다.
+  </p>
+</div>
 </body>
 </html>

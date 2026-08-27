@@ -1,42 +1,36 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ko">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#6366F1">
 <title>NCS PASS</title>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="icon" href="favicon-32.png" sizes="32x32" type="image/png">
-<link rel="apple-touch-icon" href="icon-192.png">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="NCS PASS">
-<link rel="stylesheet" href="app.css">
+<script>
+  /* 좁은 화면으로 들어오면 모바일 판으로 보낸다.
+   *
+   * 두 판은 코드가 서로 엮이지 않는다 — 이 스크립트는 **어느 문으로 들어갈지만**
+   * 정한다. 한 번 보낸 뒤에는 다시 판단하지 않는다(`?pc=1` 로 돌아올 수 있다).
+   * 렌더 전에 넘겨야 PC 화면이 한 번 번쩍이지 않는다.
+   */
+  (function () {
+    try {
+      if (location.search.includes('pc=1')) { sessionStorage.setItem('ncspass.pc', '1'); return; }
+      if (sessionStorage.getItem('ncspass.pc')) return;
+      if (matchMedia('(max-width: 767px)').matches) {
+        location.replace('./m/' + location.hash);
+      }
+    } catch (e) { /* 못 보내면 PC 판으로 둔다 — 안 보이는 것보다 낫다 */ }
+  })();
+</script>
+  <script type="module" crossorigin src="./a/desktop-B7Ae9tiC.js"></script>
+  <link rel="modulepreload" crossorigin href="./a/search-D81vFUao.js">
+  <link rel="stylesheet" crossorigin href="./a/search-NrRrvB_O.css">
+  <link rel="stylesheet" crossorigin href="./a/desktop-D0-xJJxR.css">
 </head>
 <body>
-
-<div id="boot" class="boot">
-  <div class="boot-mark">NCS PASS</div>
-  <div class="boot-msg">문항을 불러오는 중…</div>
-</div>
-
-<header id="top" class="top" hidden>
-  <button class="top-back" id="back" aria-label="뒤로">‹</button>
-  <div class="top-title" id="title">NCS PASS</div>
-  <div class="top-right" id="topRight"></div>
-</header>
-
-<main id="view" class="view" hidden></main>
-
-<nav id="tabs" class="tabs" hidden>
-  <a href="#/" data-tab="/"><span class="ti">▤</span>홈</a>
-  <a href="#/exams" data-tab="/exams"><span class="ti">✎</span>회차<b id="sitBadge" hidden>●</b></a>
-  <a href="#/review" data-tab="/review"><span class="ti">↻</span>복습<b id="dueBadge" hidden></b></a>
-  <a href="#/wrong" data-tab="/wrong"><span class="ti">✕</span>오답<b id="wrongBadge" hidden></b></a>
-  <a href="#/more" data-tab="/more"><span class="ti">⋯</span>더보기</a>
-</nav>
-
-<script src="app.js"></script>
+<div id="root"></div>
 </body>
 </html>
