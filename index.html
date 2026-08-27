@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#6366F1">
+<title>NCS PASS</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="icon" href="favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="NCS PASS">
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+
+<div id="boot" class="boot">
+  <div class="boot-mark">NCS PASS</div>
+  <div class="boot-msg">문항을 불러오는 중…</div>
+</div>
+
+<header id="top" class="top" hidden>
+  <button class="top-back" id="back" aria-label="뒤로">‹</button>
+  <div class="top-title" id="title">NCS PASS</div>
+  <div class="top-right" id="topRight"></div>
+</header>
+
+<main id="view" class="view" hidden></main>
+
+<nav id="tabs" class="tabs" hidden>
+  <a href="#/" data-tab="/"><span class="ti">▤</span>홈</a>
+  <a href="#/exams" data-tab="/exams"><span class="ti">✎</span>회차<b id="sitBadge" hidden>●</b></a>
+  <a href="#/review" data-tab="/review"><span class="ti">↻</span>복습<b id="dueBadge" hidden></b></a>
+  <a href="#/wrong" data-tab="/wrong"><span class="ti">✕</span>오답<b id="wrongBadge" hidden></b></a>
+  <a href="#/more" data-tab="/more"><span class="ti">⋯</span>더보기</a>
+</nav>
+
+<script src="app.js"></script>
+</body>
+</html>
