@@ -6,7 +6,7 @@
  * 껍데기와 문항은 install 에서 담고, 폰트는 요청될 때 담는다 —
  * 폰트 509KB 는 PC 판만 쓰므로 모바일에서 미리 받을 이유가 없다.
  */
-const VERSION = 'ncspass-8ddb88a202';
+const VERSION = 'ncspass-460f3c30ca';
 
 /** 첫 실행에 담을 것 — 16개 */
 const SHELL = [
@@ -45,6 +45,11 @@ self.addEventListener('activate', e => {
   );
 });
 
+/** 껍데기 문서인가 — 이름이 안 바뀌는 주소라 캐시가 오래 남으면 위험한 것 */
+const isDoc = (req, url) => req.mode === 'navigate'
+                         || url.pathname.endsWith('/')
+                         || url.pathname.endsWith('.html');
+
 self.addEventListener('fetch', e => {
   const req = e.request;
   if (req.method !== 'GET') return;
@@ -54,22 +59,32 @@ self.addEventListener('fetch', e => {
 
   e.respondWith((async () => {
     const cache = await caches.open(VERSION);
+
+    // ── HTML — 그물 먼저, 끊기면 캐시 ───────────────────────
+    //    캐시를 먼저 주면 배포 뒤에도 옛 껍데기가 계속 나가고, 그 안의 묶음
+    //    이름은 이미 사라져 **하얀 화면**이 된다. 오프라인일 때만 캐시로 돈다.
+    if (isDoc(req, url)) {
+      try {
+        const res = await fetch(req);
+        if (res.ok && res.type === 'basic') cache.put(req, res.clone()).catch(() => {});
+        return res;
+      } catch (err) {
+        const hit = await cache.match(req, { ignoreSearch: true })
+                 || await cache.match(url.pathname.includes('/m/') ? './m/index.html'
+                                                                   : './index.html');
+        if (hit) return hit;                        // 해시 라우터라 껍데기 하나로 된다
+        throw err;
+      }
+    }
+
+    // ── 그 밖 — 캐시 먼저 ───────────────────────────────────
+    //    묶음·폰트·아이콘·문항은 이름이나 캐시 판이 바뀌어야 바뀐다
     const hit = await cache.match(req, { ignoreSearch: true });
     if (hit) return hit;
 
-    try {
-      const res = await fetch(req);
-      // 받아 온 것을 담아 둔다 — 폰트가 여기서 캐시된다
-      if (res.ok && res.type === 'basic') cache.put(req, res.clone()).catch(() => {});
-      return res;
-    } catch (err) {
-      // 오프라인이고 캐시에도 없다. 화면 이동이면 껍데기를 준다 (해시 라우터라 그것으로 된다)
-      if (req.mode === 'navigate') {
-        const shellHit = await cache.match(url.pathname.includes('/m/') ? './m/index.html'
-                                                                       : './index.html');
-        if (shellHit) return shellHit;
-      }
-      throw err;
-    }
+    const res = await fetch(req);
+    // 받아 온 것을 담아 둔다 — 폰트가 여기서 캐시된다
+    if (res.ok && res.type === 'basic') cache.put(req, res.clone()).catch(() => {});
+    return res;
   })());
 });
