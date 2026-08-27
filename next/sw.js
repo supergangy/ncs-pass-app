@@ -6,7 +6,7 @@
  * 껍데기와 문항은 install 에서 담고, 폰트는 요청될 때 담는다 —
  * 폰트 509KB 는 PC 판만 쓰므로 모바일에서 미리 받을 이유가 없다.
  */
-const VERSION = 'ncspass-460f3c30ca';
+const VERSION = 'ncspass-6423203bf1';
 
 /** 첫 실행에 담을 것 — 16개 */
 const SHELL = [
@@ -65,7 +65,12 @@ self.addEventListener('fetch', e => {
     //    이름은 이미 사라져 **하얀 화면**이 된다. 오프라인일 때만 캐시로 돈다.
     if (isDoc(req, url)) {
       try {
-        const res = await fetch(req);
+        // fetch(req) 로는 모자란다 — 그것은 **브라우저 HTTP 캐시**를 먼저 본다.
+        //   GitHub Pages 가 HTML 에 max-age=600 을 붙이므로, 워커가 그물로 나가도
+        //   10분 동안 옛 껍데기가 되돌아온다(실측). no-cache 로 매번 서버에
+        //   물어본다 — 안 바뀌었으면 304 라 값이 거의 없다. (backtick 금지: 이 글은
+        //   템플릿 문자열 안에 들어간다)
+        const res = await fetch(url.href, { cache: 'no-cache', credentials: 'same-origin' });
         if (res.ok && res.type === 'basic') cache.put(req, res.clone()).catch(() => {});
         return res;
       } catch (err) {
