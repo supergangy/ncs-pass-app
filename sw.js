@@ -42,6 +42,8 @@ self.addEventListener('fetch', e => {
   if (req.method !== 'GET') return;
   const url = new URL(req.url);
   if (url.origin !== location.origin) return;
+  // 재제작 판은 자기 워커가 맡는다 — 여기서 캐시하면 갱신이 한 박자 늦는다
+  if (url.pathname.includes('/next/')) return;
 
   // 캐시가 있으면 먼저 내주고, 뒤에서 조용히 새것을 받아 둔다.
   // 오프라인에서 즉시 뜨는 것이 먼저이고, 갱신은 다음 실행에 반영된다.
