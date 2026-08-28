@@ -6,16 +6,16 @@
  * 껍데기와 문항은 install 에서 담고, 폰트는 요청될 때 담는다 —
  * 폰트 509KB 는 PC 판만 쓰므로 모바일에서 미리 받을 이유가 없다.
  */
-const VERSION = 'ncspass-418bf31979';
+const VERSION = 'ncspass-877be28d9a';
 
 /** 첫 실행에 담을 것 — 16개 */
 const SHELL = [
-  "./a/desktop-C5FE3UE1.js",
-  "./a/desktop-D5uEp9Wa.css",
-  "./a/mobile-CKQosG81.css",
-  "./a/mobile-D_lojgqD.js",
-  "./a/search-N-2YDJAB.js",
-  "./a/search-NrRrvB_O.css",
+  "./a/desktop-CyxHF-jb.css",
+  "./a/desktop-D_HpVt6S.js",
+  "./a/mobile-jjG7xYPi.js",
+  "./a/mobile-o0RoOLMR.css",
+  "./a/search-CUoaY1v8.css",
+  "./a/search-lHdeWSwa.js",
   "./data/bank.json",
   "./favicon-32.png",
   "./icon-192.png",
