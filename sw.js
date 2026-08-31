@@ -6,15 +6,15 @@
  * 껍데기와 문항은 install 에서 담고, 폰트는 요청될 때 담는다 —
  * 폰트 509KB 는 PC 판만 쓰므로 모바일에서 미리 받을 이유가 없다.
  */
-const VERSION = 'ncspass-21c7fa6ea0';
+const VERSION = 'ncspass-fe73e64a58';
 
 /** 첫 실행에 담을 것 — 16개 */
 const SHELL = [
-  "./a/desktop-D6iAZcb0.js",
   "./a/desktop-Dv3rixtm.css",
+  "./a/desktop-QfoKZ9t7.js",
   "./a/mobile-CHlY1o8E.css",
-  "./a/mobile-CvqaEFUe.js",
-  "./a/search-CFmDxxpV.js",
+  "./a/mobile-DC3x7tRN.js",
+  "./a/search-BVrPbOck.js",
   "./a/search-DyoE9MAU.css",
   "./data/bank.json",
   "./favicon-32.png",
@@ -50,12 +50,19 @@ const isDoc = (req, url) => req.mode === 'navigate'
                          || url.pathname.endsWith('/')
                          || url.pathname.endsWith('.html');
 
+/** 내려받는 파일인가 — 회차 PDF. 기기에 저장되므로 캐시에 또 두지 않는다 */
+const isDownload = url => url.pathname.includes('/exams/');
+
 self.addEventListener('fetch', e => {
   const req = e.request;
   if (req.method !== 'GET') return;
 
   const url = new URL(req.url);
   if (url.origin !== location.origin) return;      // 남의 집 것은 건드리지 않는다
+
+  // 회차 PDF 는 워커가 손대지 않는다 — 12MB 를 캐시에 겹쳐 두지 않으려는 것이다.
+  // 그물이 없으면 내려받기가 실패하지만, 그것은 정직한 실패다.
+  if (isDownload(url)) return;
 
   e.respondWith((async () => {
     const cache = await caches.open(VERSION);
